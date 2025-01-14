@@ -1,4 +1,4 @@
-const API_KEY = import.meta.env.MOVIEDB_API_KEY;
+const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 
 export const getPopulareMovies = async () => {
   const res = await fetch(
