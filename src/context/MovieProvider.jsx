@@ -1,25 +1,130 @@
 import React, { useCallback, useEffect } from "react";
-import { getPopulareMovies } from "../services/movieServices";
+import { useLocation } from "react-router";
+import {
+  getMovieCredits,
+  getNowPlayingMovies,
+  getOneMovieDetails,
+  getPopulareMovies,
+  getTopRatedMovies,
+  getUpcomingMovies,
+} from "../services/movieServices";
 
 const MovieContext = React.createContext();
 
 const MovieProvider = ({ children }) => {
-  const [moviesData, setMoviesData] = React.useState([]);
-  const [popularMoviesData, setPopularMoviesData] = React.useState([]);
+  const location = useLocation();
 
-  const fetchData = useCallback(async () => {
+  const [moviesData, setMoviesData] = React.useState([]);
+  const [movieData, setMovieData] = React.useState({});
+  const [wishlistData, setWishlistData] = React.useState([]);
+  const [categorySelected, setCategorySelected] = React.useState({
+    popular: true,
+    nowPlaying: false,
+    topRated: false,
+    upcoming: false,
+  });
+
+  const fetchPopularMovie = useCallback(async () => {
     const data = await getPopulareMovies();
     setMoviesData(data);
   }, []);
 
+  const fetchNowPlayingMovie = useCallback(async () => {
+    const data = await getNowPlayingMovies();
+    setMoviesData(data);
+  }, []);
+
+  const fetchTopRatedMovie = useCallback(async () => {
+    const data = await getTopRatedMovies();
+    setMoviesData(data);
+  }, []);
+
+  const fetchUpcomingMovie = useCallback(async () => {
+    const data = await getUpcomingMovies();
+    setMoviesData(data);
+  }, []);
+
+  const fetchOneMovie = useCallback(async (movieId) => {
+    const data = await getOneMovieDetails(movieId);
+    const credits = await getMovieCredits(movieId);
+    setMovieData({ ...data, credits });
+  }, []);
+
+  const handleCategorySelected = (category) =>
+    setCategorySelected({
+      nowPlaying: false,
+      popular: false,
+      topRated: false,
+      upcoming: false,
+      [category]: true,
+    });
+
+  const handleAddToWishlist = (movie) => {
+    const checkIfMovieAlreadyAdded = wishlistData.find(
+      (item) => item.id === movie.id
+    );
+
+    if (!checkIfMovieAlreadyAdded)
+      setWishlistData((prevState) => [...prevState, movie]);
+
+    localStorage.removeItem("wishlist");
+    localStorage.setItem("wishlist", JSON.stringify([...wishlistData, movie]));
+  };
+
+  const handleDeleteFromWishlist = (movieId) => {
+    const updatedWishlist = wishlistData.filter(
+      (movie) => movie.id !== movieId
+    );
+    setWishlistData(updatedWishlist);
+
+    localStorage.removeItem("wishlist");
+    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+  };
+
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (categorySelected.popular) fetchPopularMovie();
+    if (categorySelected.nowPlaying) fetchNowPlayingMovie();
+    if (categorySelected.topRated) fetchTopRatedMovie();
+    if (categorySelected.upcoming) fetchUpcomingMovie();
+  }, [
+    fetchPopularMovie,
+    categorySelected,
+    fetchNowPlayingMovie,
+    fetchTopRatedMovie,
+    fetchUpcomingMovie,
+  ]);
+
+  useEffect(() => {
+    const movieId = location.pathname.split("/")[1];
+    if (movieId) fetchOneMovie(movieId);
+
+    return () => {
+      setMovieData({});
+    };
+  }, [location.pathname, fetchOneMovie]);
+
+  useEffect(() => {
+    const wishlist = JSON.parse(localStorage.getItem("wishlist"));
+    if (wishlist) setWishlistData(wishlist);
+
+    console.log("wishlistData", wishlistData);
+
+    return () => {
+      setWishlistData([]);
+    };
+  }, []);
+
+  const value = {
+    state: { moviesData, movieData, wishlistData, categorySelected, location },
+    actions: {
+      deleteFromWishlist: handleDeleteFromWishlist,
+      categorySelected: handleCategorySelected,
+      addToWishlist: handleAddToWishlist,
+    },
+  };
 
   return (
-    <MovieContext.Provider value={{ moviesData, popularMoviesData }}>
-      {children}
-    </MovieContext.Provider>
+    <MovieContext.Provider value={value}>{children}</MovieContext.Provider>
   );
 };
 

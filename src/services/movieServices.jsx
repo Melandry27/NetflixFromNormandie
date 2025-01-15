@@ -10,7 +10,7 @@ export const getPopulareMovies = async () => {
   return res.json();
 };
 
-export const getOnAirMovie = async () => {
+export const getNowPlayingMovies = async () => {
   const res = await fetch(
     `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}`
   );
@@ -23,6 +23,16 @@ export const getOnAirMovie = async () => {
 export const getTopRatedMovies = async () => {
   const res = await fetch(
     `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch popular movies");
+
+  return res.json();
+};
+
+export const getUpcomingMovies = async () => {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}`
   );
 
   if (!res.ok) throw new Error("Failed to fetch popular movies");
@@ -46,6 +56,16 @@ export const getOneMovieBySearch = async (searchQuery) => {
   );
 
   if (!res.ok) throw new Error("Failed to fetch movie details");
+
+  return res.json();
+};
+
+export const getMovieCredits = async (movieId) => {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${API_KEY}`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch movie credits");
 
   return res.json();
 };
