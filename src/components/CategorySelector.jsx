@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { MovieContext } from "../context/MovieProvider";
 
 const CategorySelector = () => {
@@ -6,6 +6,13 @@ const CategorySelector = () => {
 
   return (
     <div className="flex flex-col items-center p-4 text-white bg-gray-900">
+      <div className="flex mb-4 space-x-4">
+        <input
+          type="text"
+          className="px-4 py-2 text-black rounded"
+          onChange={(e) => actions.searchMovies(e.target.value)}
+        />
+      </div>
       <div className="flex mb-4 space-x-4">
         <button
           className="px-4 py-2 font-bold text-white bg-red-600 rounded hover:bg-red-700"

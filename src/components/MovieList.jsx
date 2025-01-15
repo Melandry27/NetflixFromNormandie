@@ -6,7 +6,7 @@ import CategorySelector from "./CategorySelector";
 import MovieCard from "./MovieCard";
 
 const MovieList = () => {
-  const { state, actions } = useContext(MovieContext);
+  const { state } = useContext(MovieContext);
 
   return (
     <div className="min-h-screen text-white bg-gray-800">

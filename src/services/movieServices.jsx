@@ -50,7 +50,7 @@ export const getOneMovieDetails = async (movieId) => {
   return res.json();
 };
 
-export const getOneMovieBySearch = async (searchQuery) => {
+export const getMoviesBySearch = async (searchQuery) => {
   const res = await fetch(
     `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${searchQuery}`
   );
@@ -66,6 +66,16 @@ export const getMovieCredits = async (movieId) => {
   );
 
   if (!res.ok) throw new Error("Failed to fetch movie credits");
+
+  return res.json();
+};
+
+export const getSimilarMovies = async (movieId) => {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${movieId}/similar?api_key=${API_KEY}`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch similar movies");
 
   return res.json();
 };

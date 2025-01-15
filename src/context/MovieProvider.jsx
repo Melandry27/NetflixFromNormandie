@@ -2,9 +2,11 @@ import React, { useCallback, useEffect } from "react";
 import { useLocation } from "react-router";
 import {
   getMovieCredits,
+  getMoviesBySearch,
   getNowPlayingMovies,
   getOneMovieDetails,
   getPopulareMovies,
+  getSimilarMovies,
   getTopRatedMovies,
   getUpcomingMovies,
 } from "../services/movieServices";
@@ -23,6 +25,16 @@ const MovieProvider = ({ children }) => {
     topRated: false,
     upcoming: false,
   });
+
+  const fetchSearchMovies = useCallback(async (query) => {
+    if (!query) {
+      const data = await getPopulareMovies();
+      return setMoviesData(data);
+    }
+
+    const data = await getMoviesBySearch(query);
+    setMoviesData(data);
+  }, []);
 
   const fetchPopularMovie = useCallback(async () => {
     const data = await getPopulareMovies();
@@ -47,7 +59,9 @@ const MovieProvider = ({ children }) => {
   const fetchOneMovie = useCallback(async (movieId) => {
     const data = await getOneMovieDetails(movieId);
     const credits = await getMovieCredits(movieId);
-    setMovieData({ ...data, credits });
+    const similarMovies = await getSimilarMovies(movieId);
+
+    setMovieData({ ...data, credits, similarMovies });
   }, []);
 
   const handleCategorySelected = (category) =>
@@ -92,6 +106,7 @@ const MovieProvider = ({ children }) => {
     fetchNowPlayingMovie,
     fetchTopRatedMovie,
     fetchUpcomingMovie,
+    fetchSearchMovies,
   ]);
 
   useEffect(() => {
@@ -107,8 +122,6 @@ const MovieProvider = ({ children }) => {
     const wishlist = JSON.parse(localStorage.getItem("wishlist"));
     if (wishlist) setWishlistData(wishlist);
 
-    console.log("wishlistData", wishlistData);
-
     return () => {
       setWishlistData([]);
     };
@@ -120,6 +133,7 @@ const MovieProvider = ({ children }) => {
       deleteFromWishlist: handleDeleteFromWishlist,
       categorySelected: handleCategorySelected,
       addToWishlist: handleAddToWishlist,
+      searchMovies: fetchSearchMovies,
     },
   };
 
